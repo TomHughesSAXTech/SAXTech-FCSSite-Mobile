@@ -997,6 +997,30 @@
             }
         }
 
+        // Fallback client list when webhook fails
+        function useFallbackClients() {
+            console.log('🔄 Loading fallback client list...');
+            
+            // Known client list from previous successful loads
+            const fallbackClients = [
+                { name: 'Amsterdam', displayName: 'Amsterdam' },
+                { name: 'Baruch', displayName: 'Baruch' },
+                { name: 'Brownsville', displayName: 'Brownsville' },
+                { name: 'Smith', displayName: 'Smith' },
+                { name: 'Sumner', displayName: 'Sumner' }
+            ];
+            
+            fallbackClients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.name;
+                option.textContent = client.displayName;
+                clientSelect.appendChild(option);
+            });
+            
+            systemStatus.clients = true; // Consider fallback as working
+            addSystemMessage(`⚙️ Loaded ${fallbackClients.length} clients from fallback list (webhook unavailable)`);
+        }
+
         // Load clients
         async function loadClients() {
             console.log('🔄 Loading clients from webhook...');
@@ -1050,25 +1074,23 @@
                     addSystemMessage(`✅ Successfully loaded ${data.clients.length} client(s) from webhook`);
                 } else {
                     console.warn('⚠️ No clients found in response or invalid format');
-                    addSystemMessage('⚠️ No clients found in webhook response - using general mode only');
+                    // Use fallback client list
+                    useFallbackClients();
                 }
                 
             } catch (error) {
                 console.error('❌ Error loading clients:', error);
                 systemStatus.clients = false;
                 
+                // Use fallback client list when webhook fails
+                console.log('🔄 Using fallback client list due to webhook error');
+                useFallbackClients();
+                
                 // Add retry option
                 const retryOption = document.createElement('option');
                 retryOption.value = 'retry';
-                retryOption.textContent = '↻ Retry loading clients';
+                retryOption.textContent = '↻ Retry webhook clients';
                 clientSelect.appendChild(retryOption);
-                
-                // Show user-friendly error message
-                const errorMsg = error.message.includes('Empty response') ? 
-                    '🔧 Client loading service is currently unavailable. Using general construction knowledge mode.' :
-                    `🔧 Client loading error: ${error.message}. Using general construction knowledge mode.`;
-                    
-                addSystemMessage(errorMsg);
             }
             
             updateSystemStatus();
