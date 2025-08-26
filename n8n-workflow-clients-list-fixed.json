@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "instanceId": "n8n-workflow-clients-list-fixed"
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "path": "ask-foreman/clients/list",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger - Client List",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "clients-list-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Fixed client list - webhook-only approach\n// No Azure Blob Storage access needed\n\nconst clientList = {\n  clients: [\n    {\n      name: \"Amsterdam\",\n      displayName: \"Amsterdam\",\n      id: \"amsterdam\",\n      category: \"construction\",\n      type: \"project\"\n    },\n    {\n      name: \"Baruch\",\n      displayName: \"Baruch\",\n      id: \"baruch\",\n      category: \"construction\",\n      type: \"project\"\n    },\n    {\n      name: \"Brownsville\",\n      displayName: \"Brownsville\",\n      id: \"brownsville\",\n      category: \"construction\",\n      type: \"project\"\n    },\n    {\n      name: \"Smith\",\n      displayName: \"Smith\",\n      id: \"smith\",\n      category: \"construction\",\n      type: \"project\"\n    },\n    {\n      name: \"Sumner\",\n      displayName: \"Sumner\",\n      id: \"sumner\",\n      category: \"construction\",\n      type: \"project\"\n    }\n  ],\n  count: 5,\n  timestamp: new Date().toISOString(),\n  source: \"webhook-direct\",\n  version: \"2.0\"\n};\n\n// Log for debugging\nconsole.log('✅ Returning client list via webhook-only approach:', clientList);\n\nreturn [{\n  json: clientList\n}];"
+      },
+      "id": "generate-client-list",
+      "name": "Generate Client List",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-cache, no-store, must-revalidate"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-to-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger - Client List": {
+      "main": [
+        [
+          {
+            "node": "Generate Client List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Client List": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {},
+  "tags": [
+    {
+      "createdAt": "2025-08-26T05:34:39.000Z",
+      "updatedAt": "2025-08-26T05:34:39.000Z",
+      "id": "ask-foreman-clients",
+      "name": "ask-foreman-clients"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-08-26T05:34:39.000Z",
+  "versionId": "fixed-webhook-only"
+}
