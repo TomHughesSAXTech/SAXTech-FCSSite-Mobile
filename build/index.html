@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Ask Foreman - Construction Estimating Assistant</title>
+    <link rel="stylesheet" href="mobile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="header-title">Ask Foreman AI</div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+    </header>
+
+    <!-- Slide-out Navigation Sidebar -->
+    <nav class="mobile-sidebar" id="mobileSidebar">
+        <div class="sidebar-header">
+            <h2>Navigation</h2>
+            <button class="close-sidebar" id="closeSidebar" aria-label="Close sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="#home" class="nav-link active">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#services" class="nav-link">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Services</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#solutions" class="nav-link">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    <span>Solutions</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#about" class="nav-link">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-section">
+                <div class="user-avatar">👷</div>
+                <span class="user-name">Foreman User</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Overlay for sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content Area -->
+    <main class="mobile-content">
+        <!-- Hero Section -->
+        <section class="hero-section" id="home">
+            <div class="content-card">
+                <div class="construction-badge">
+                    <img src="ForemanAI.png" alt="Ask Foreman AI" style="width: 60px; height: 60px; object-fit: contain;" />
+                </div>
+                <h1 class="main-title">ASK FOREMAN AI</h1>
+                <p class="subtitle">Your Construction Estimating Assistant</p>
+                <p class="tagline">Powered by SAX Technology Advisors</p>
+                <div class="action-buttons">
+                    <button class="primary-btn" onclick="startChat()">Start Chatting</button>
+                    <button class="secondary-btn" onclick="uploadDocs()">Upload Documents</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services-section" id="services">
+            <div class="content-card">
+                <h2 class="section-title">Construction AI Features</h2>
+                <div class="service-grid">
+                    <div class="service-card">
+                        <div class="service-icon">📐</div>
+                        <h3>Cost Estimation</h3>
+                        <p>Instant accurate estimates for materials and labor costs</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">📋</div>
+                        <h3>Document Analysis</h3>
+                        <p>Upload plans and specs for AI-powered insights</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">⚡</div>
+                        <h3>Real-time Chat</h3>
+                        <p>Get instant answers to construction questions</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solutions Section -->
+        <section class="solutions-section" id="solutions">
+            <div class="content-card">
+                <h2 class="section-title">How It Works</h2>
+                <div class="solution-list">
+                    <div class="solution-item">
+                        <h3>1. Upload Your Documents</h3>
+                        <p>Upload blueprints, specifications, and project documents</p>
+                        <a href="#" class="text-link">Start Upload →</a>
+                    </div>
+                    <div class="solution-item">
+                        <h3>2. Ask Questions</h3>
+                        <p>Chat with our AI about costs, materials, and timelines</p>
+                        <a href="#" class="text-link">Begin Chat →</a>
+                    </div>
+                    <div class="solution-item">
+                        <h3>3. Get Instant Estimates</h3>
+                        <p>Receive detailed breakdowns and professional reports</p>
+                        <a href="#" class="text-link">View Sample →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section" id="about">
+            <div class="content-card">
+                <h2 class="section-title">About Ask Foreman</h2>
+                <p class="about-text">
+                    Ask Foreman is your AI-powered construction assistant, designed to streamline estimating and project planning. Built by SAX Technology Advisors, we combine industry expertise with cutting-edge AI to deliver instant, accurate construction insights.
+                </p>
+            </div>
+        </section>
+
+
+        <!-- Footer -->
+        <footer class="mobile-footer">
+            <p>&copy; 2025 Ask Foreman - SAX Technology Advisors. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <!-- Floating Action Button (Optional) -->
+    <button class="fab" id="fabButton" aria-label="Quick action">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+    </button>
+
+    <script src="mobile.js"></script>
+</body>
+</html>
