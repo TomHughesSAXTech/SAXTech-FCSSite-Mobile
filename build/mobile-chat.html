@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Ask Foreman AI - Mobile</title>
     <meta name="description" content="Construction AI Assistant - Mobile Chat Interface">
     <meta name="theme-color" content="#10a37f">
@@ -58,6 +58,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -65,11 +66,13 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             height: 100vh;
+            height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            touch-action: pan-y;
         }
 
         /* Header */
@@ -390,13 +393,14 @@
             padding: 0.75rem 1rem;
             border: 2px solid var(--border-color);
             border-radius: 24px;
-            font-size: 1rem;
+            font-size: 16px; /* Prevent zoom on iOS */
             background: var(--bg-secondary);
             color: var(--text-primary);
             resize: none;
             outline: none;
             transition: all 0.3s ease;
             font-family: inherit;
+            -webkit-appearance: none;
         }
 
         .chat-input:focus {
@@ -517,6 +521,10 @@
             
             .message {
                 max-width: 95%;
+            }
+            
+            .chat-input {
+                font-size: 16px; /* Prevent zoom on iOS */
             }
         }
 
@@ -997,8 +1005,34 @@
             }
         }
 
+        // Fallback client list when webhook fails
+        function useFallbackClients() {
+            console.log('🔄 Loading fallback client list...');
+            
+            // Known client list from previous successful loads
+            const fallbackClients = [
+                { name: 'Amsterdam', displayName: 'Amsterdam' },
+                { name: 'Baruch', displayName: 'Baruch' },
+                { name: 'Brownsville', displayName: 'Brownsville' },
+                { name: 'Smith', displayName: 'Smith' },
+                { name: 'Sumner', displayName: 'Sumner' }
+            ];
+            
+            fallbackClients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.name;
+                option.textContent = client.displayName;
+                clientSelect.appendChild(option);
+            });
+            
+            systemStatus.clients = true; // Consider fallback as working
+            addSystemMessage(`⚙️ Loaded ${fallbackClients.length} clients from fallback list (webhook unavailable)`);
+        }
+
         // Load clients
         async function loadClients() {
+            console.log('🔄 Loading clients from webhook...');
+            
             try {
                 const response = await fetch(API_CONFIG.listClientsWebhookUrl, {
                     method: 'GET',
@@ -1007,17 +1041,36 @@
                     }
                 });
                 
+                console.log(`📡 Webhook response status: ${response.status}`);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const data = await response.json();
+                // Get response text first to check if it's empty
+                const responseText = await response.text();
+                console.log(`📝 Raw response (first 200 chars): ${responseText.substring(0, 200)}`);
+                
+                if (!responseText || responseText.trim() === '') {
+                    throw new Error('Empty response from webhook - n8n workflow may not be running');
+                }
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (jsonError) {
+                    console.error('❌ JSON parsing failed:', jsonError);
+                    throw new Error(`Invalid JSON response: ${jsonError.message}`);
+                }
+                
+                console.log('✅ Parsed webhook data:', data);
                 
                 // Clear existing options (keep general)
                 clientSelect.innerHTML = '<option value="general">General Construction Knowledge</option>';
                 
                 // Add client options
-                if (data.clients && Array.isArray(data.clients)) {
+                if (data && data.clients && Array.isArray(data.clients)) {
+                    console.log(`📋 Adding ${data.clients.length} clients to dropdown`);
                     data.clients.forEach(client => {
                         const option = document.createElement('option');
                         option.value = client.name || client;
@@ -1026,16 +1079,25 @@
                     });
                     
                     systemStatus.clients = true;
+                    addSystemMessage(`✅ Successfully loaded ${data.clients.length} client(s) from webhook`);
+                } else {
+                    console.warn('⚠️ No clients found in response or invalid format');
+                    // Use fallback client list
+                    useFallbackClients();
                 }
                 
             } catch (error) {
-                console.error('Error loading clients:', error);
+                console.error('❌ Error loading clients:', error);
                 systemStatus.clients = false;
+                
+                // Use fallback client list when webhook fails
+                console.log('🔄 Using fallback client list due to webhook error');
+                useFallbackClients();
                 
                 // Add retry option
                 const retryOption = document.createElement('option');
                 retryOption.value = 'retry';
-                retryOption.textContent = '↻ Retry loading clients';
+                retryOption.textContent = '↻ Retry webhook clients';
                 clientSelect.appendChild(retryOption);
             }
             

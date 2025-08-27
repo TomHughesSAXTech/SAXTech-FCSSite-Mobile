@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Ask Foreman AI - Mobile</title>
     <meta name="description" content="Construction AI Assistant - Mobile Chat Interface">
     <meta name="theme-color" content="#10a37f">
@@ -58,6 +58,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -65,11 +66,13 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             height: 100vh;
+            height: -webkit-fill-available;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            touch-action: pan-y;
         }
 
         /* Header */
@@ -390,13 +393,14 @@
             padding: 0.75rem 1rem;
             border: 2px solid var(--border-color);
             border-radius: 24px;
-            font-size: 1rem;
+            font-size: 16px; /* Prevent zoom on iOS */
             background: var(--bg-secondary);
             color: var(--text-primary);
             resize: none;
             outline: none;
             transition: all 0.3s ease;
             font-family: inherit;
+            -webkit-appearance: none;
         }
 
         .chat-input:focus {
@@ -517,6 +521,10 @@
             
             .message {
                 max-width: 95%;
+            }
+            
+            .chat-input {
+                font-size: 16px; /* Prevent zoom on iOS */
             }
         }
 
