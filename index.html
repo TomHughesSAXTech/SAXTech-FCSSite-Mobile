@@ -12,8 +12,8 @@
                 // Check user agent
                 const userAgent = navigator.userAgent || navigator.vendor || window.opera;
                 
-                // Check for mobile devices
-                const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i;
+                // More comprehensive mobile detection
+                const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet|silk|kindle|phone/i;
                 
                 // Check screen size as additional validation
                 const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -24,8 +24,9 @@
                                     (navigator.maxTouchPoints > 0) || 
                                     (navigator.msMaxTouchPoints > 0);
                 
-                // Return true if mobile user agent AND (mobile screen OR touch device)
-                return mobileRegex.test(userAgent.toLowerCase()) && (isMobileScreen || isTouchDevice);
+                // Return true if mobile user agent OR mobile screen size OR touch device
+                // More permissive to catch more mobile devices
+                return mobileRegex.test(userAgent.toLowerCase()) || isMobileScreen || isTouchDevice;
             }
             
             // Function to get URL parameter
@@ -50,8 +51,11 @@
             // Get stored preference
             const viewPreference = localStorage.getItem('viewPreference');
             
+            // Check for specific project page parameter
+            const viewProjects = getUrlParameter('projects') === 'true';
+            
             // Determine where to redirect
-            if (!forceDesktop && (forceMobile || (isMobileDevice() && viewPreference !== 'desktop'))) {
+            if (viewProjects || (!forceDesktop && (forceMobile || (isMobileDevice() && viewPreference !== 'desktop')))) {
                 // Redirect to mobile project chat version
                 window.location.replace('/mobile-projects.html');
             } else {
@@ -95,6 +99,13 @@
         <h2>SAXTech FCS</h2>
         <div class="spinner"></div>
         <p>Loading optimized experience...</p>
+        <div style="margin-top: 2rem;">
+            <p style="font-size: 0.9rem; opacity: 0.8;">Choose your view:</p>
+            <div style="margin-top: 1rem;">
+                <a href="/mobile-projects.html" style="display: inline-block; padding: 0.75rem 1.5rem; background: #1976d2; color: white; text-decoration: none; border-radius: 25px; margin: 0.5rem;">📱 Mobile Chat</a>
+                <a href="/desktop.html" style="display: inline-block; padding: 0.75rem 1.5rem; background: #424242; color: white; text-decoration: none; border-radius: 25px; margin: 0.5rem;">💻 Desktop View</a>
+            </div>
+        </div>
     </div>
     
     <noscript>
