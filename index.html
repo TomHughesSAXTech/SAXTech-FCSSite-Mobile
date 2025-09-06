@@ -52,8 +52,8 @@
             
             // Determine where to redirect
             if (!forceDesktop && (forceMobile || (isMobileDevice() && viewPreference !== 'desktop'))) {
-                // Redirect to mobile version
-                window.location.replace('/mobile.html');
+                // Redirect to mobile project chat version
+                window.location.replace('/mobile-projects.html');
             } else {
                 // Continue loading desktop version
                 window.location.replace('/desktop.html');
@@ -98,14 +98,14 @@
     </div>
     
     <noscript>
-        <meta http-equiv="refresh" content="0; url=/mobile.html">
+        <meta http-equiv="refresh" content="0; url=/mobile-projects.html">
         <style>
             .loading { display: none; }
         </style>
         <div style="text-align: center; padding: 20px;">
             <h2>JavaScript is disabled</h2>
             <p>Redirecting to mobile site...</p>
-            <p><a href="/mobile.html">Click here if not redirected</a></p>
+            <p><a href="/mobile-projects.html">Click here if not redirected</a></p>
         </div>
     </noscript>
 </body>

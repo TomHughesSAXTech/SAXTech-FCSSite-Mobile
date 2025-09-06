@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ask Foreman - Project Chat</title>
+    <meta name="description" content="Construction Project Management Chat Interface">
+    <meta name="theme-color" content="#1976d2">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Ask Foreman">
+    
+    <style>
+        :root {
+            /* Construction Theme Colors */
+            --construction-orange: #ff6b35;
+            --safety-yellow: #ffc107;
+            --concrete-gray: #424242;
+            --steel-gray: #616161;
+            --blueprint-blue: #1565c0;
+            --hi-vis-green: #76ff03;
+            --warning-red: #d32f2f;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #212121;
+            
+            /* Project Management Blues */
+            --primary-blue: #1976d2;
+            --dark-blue: #0d47a1;
+            --light-blue: #42a5f5;
+            
+            /* Layout dimensions for iPhone */
+            --header-height: 60px;
+            --input-container-height: 70px;
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+        }
+
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-chat: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --border-color: #404040;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d47a1 0%, #002171 100%);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            touch-action: pan-y;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Main Container */
+        .app-container {
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--dark-gray) 0%, var(--dark-blue) 100%);
+            height: var(--header-height);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid var(--light-blue);
+            position: relative;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .logo-mini {
+            width: 36px;
+            height: 36px;
+            background: var(--light-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .project-selector {
+            flex: 1;
+            position: relative;
+        }
+
+        .project-dropdown {
+            width: 100%;
+            padding: 0.4rem 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            font-size: 0.85rem;
+            appearance: none;
+            cursor: pointer;
+            padding-right: 2rem;
+        }
+
+        .project-dropdown option {
+            background: var(--dark-blue);
+            color: white;
+        }
+
+        .dropdown-arrow {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: white;
+            font-size: 0.7rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--light-gray);
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        /* Messages */
+        .message {
+            display: flex;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            word-wrap: break-word;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--primary-blue) 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-bubble {
+            background: white;
+            color: var(--dark-gray);
+            border: 1px solid var(--medium-gray);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-time {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        /* System Messages */
+        .system-message {
+            text-align: center;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .system-message-content {
+            display: inline-block;
+            background: rgba(var(--primary-blue), 0.1);
+            color: var(--primary-blue);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            padding: 0 1rem 1rem;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-bubble {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: inline-flex;
+            gap: 0.3rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--concrete-gray);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Input Container */
+        .input-container {
+            background: white;
+            border-top: 1px solid var(--medium-gray);
+            padding: 0.75rem;
+            padding-bottom: calc(0.75rem + var(--safe-area-bottom));
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            position: relative;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.6rem 2.5rem 0.6rem 1rem;
+            border: 2px solid var(--medium-gray);
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-blue);
+        }
+
+        .attach-btn {
+            position: absolute;
+            right: 60px;
+            width: 30px;
+            height: 30px;
+            background: none;
+            border: none;
+            color: var(--concrete-gray);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--light-blue), var(--primary-blue));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: absolute;
+            bottom: calc(var(--input-container-height) + 20px + var(--safe-area-bottom));
+            right: 1rem;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--hi-vis-green), #64dd17);
+            border: none;
+            border-radius: 50%;
+            color: var(--dark-gray);
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(118, 255, 3, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Attached Files Preview */
+        .attached-files {
+            display: none;
+            padding: 0.5rem 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .attached-files.active {
+            display: flex;
+        }
+
+        .attached-file {
+            background: var(--light-gray);
+            border: 1px solid var(--medium-gray);
+            border-radius: 15px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            position: relative;
+        }
+
+        .remove-attachment {
+            background: var(--warning-red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--medium-gray);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hidden file input */
+        #fileInput {
+            display: none;
+        }
+
+        /* Responsive adjustments for different iPhone models */
+        @media (max-height: 667px) {
+            /* iPhone SE, 6, 7, 8 */
+            .header {
+                height: 50px;
+            }
+            .chat-input {
+                padding: 0.5rem 2.5rem 0.5rem 1rem;
+            }
+        }
+
+        @media (min-height: 812px) {
+            /* iPhone X and newer */
+            .header {
+                padding-top: var(--safe-area-top);
+                height: calc(60px + var(--safe-area-top));
+            }
+        }
+
+        /* Formatted message content */
+        .formatted-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .formatted-content ul,
+        .formatted-content ol {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .formatted-content li {
+            margin: 0.25rem 0;
+        }
+
+        .formatted-content strong {
+            font-weight: 600;
+        }
+
+        .formatted-content code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message.user .formatted-content code {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-mini">🏗️</div>
+                <div class="project-selector">
+                    <select id="projectSelect" class="project-dropdown">
+                        <option value="general">General Chat</option>
+                    </select>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" id="themeToggle" title="Toggle theme">
+                    🌙
+                </button>
+                <button class="header-btn" id="menuBtn" title="Menu">
+                    ☰
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <!-- Messages Area -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    <div class="message-bubble">
+                        <div class="formatted-content">
+                            <strong>Welcome to Ask Foreman Project Chat!</strong><br><br>
+                            I'm here to help with your construction projects. You can:
+                            • Ask questions about any project
+                            • Upload drawings and documents
+                            • Get instant estimates
+                            • Access project history<br><br>
+                            Select a project above or start with a general question!
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-bubble">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Container -->
+        <div class="input-container">
+            <div class="attached-files" id="attachedFiles"></div>
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="Ask about your project..."
+                    autocomplete="off"
+                    autocorrect="off"
+                >
+                <button class="attach-btn" id="attachBtn" title="Attach file">
+                    📎
+                </button>
+                <button class="send-btn" id="sendBtn" disabled>
+                    ➤
+                </button>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab" id="fabBtn" title="Quick Actions">
+            ⚡
+        </button>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileInput" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" multiple>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_CONFIG = {
+            chatWebhookUrl: "https://workflows.saxtechnology.com/webhook/ask-foreman/ProjectChat",
+            clientsWebhookUrl: "https://workflows.saxtechnology.com/webhook/ask-foreman/clients/list"
+        };
+
+        const AZURE_STORAGE = {
+            account: "saxtechfcs",
+            container: "fcs-clients",
+            tempContainer: "temp-chat-files",
+            sasToken: "?sp=racwdl&st=2025-08-08T05:00:57Z&se=2030-08-08T13:15:57Z&spr=https&sv=2024-11-04&sr=c&sig=lJKK9jDZ59pJSNkKSgwaQIrCdBaJzx4XPzgEB2%2FrnIg%3D"
+        };
+
+        // State
+        let currentProject = 'general';
+        let attachedImages = [];
+        let isTyping = false;
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+        const attachedFilesContainer = document.getElementById('attachedFiles');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const projectSelect = document.getElementById('projectSelect');
+        const themeToggle = document.getElementById('themeToggle');
+        const fabBtn = document.getElementById('fabBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+            setupEventListeners();
+            checkTheme();
+        });
+
+        // Load available projects
+        async function loadProjects() {
+            try {
+                const response = await fetch(API_CONFIG.clientsWebhookUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.clients && Array.isArray(data.clients)) {
+                        updateProjectDropdown(data.clients);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        // Update project dropdown
+        function updateProjectDropdown(clients) {
+            projectSelect.innerHTML = '<option value="general">General Chat</option>';
+            
+            clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id || client.name;
+                option.textContent = client.name;
+                projectSelect.appendChild(option);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Chat input
+            chatInput.addEventListener('input', () => {
+                sendBtn.disabled = !chatInput.value.trim() && attachedImages.length === 0;
+            });
+
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Send button
+            sendBtn.addEventListener('click', sendMessage);
+
+            // Attach button
+            attachBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Project selector
+            projectSelect.addEventListener('change', (e) => {
+                currentProject = e.target.value;
+                addSystemMessage(`Switched to ${e.target.options[e.target.selectedIndex].text}`);
+            });
+
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // FAB button
+            fabBtn.addEventListener('click', showQuickActions);
+
+            // Paste event for images
+            document.addEventListener('paste', handlePaste);
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message && attachedImages.length === 0) return;
+
+            // Disable input
+            sendBtn.disabled = true;
+            chatInput.disabled = true;
+
+            // Add user message
+            addMessage(message, 'user', attachedImages);
+
+            // Clear input and attachments
+            chatInput.value = '';
+            attachedImages = [];
+            updateAttachedFiles();
+
+            // Show typing indicator
+            showTyping();
+
+            try {
+                // Prepare request body
+                const requestBody = {
+                    message: message,
+                    context: currentProject,
+                    attachments: attachedImages.map(img => ({
+                        type: img.type,
+                        name: img.name,
+                        url: img.url
+                    }))
+                };
+
+                // Send to API
+                const response = await fetch(API_CONFIG.chatWebhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Add assistant response
+                addMessage(data.response || data.message || 'I received your message.', 'assistant');
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+            } finally {
+                // Re-enable input
+                hideTyping();
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        // Add message to chat
+        function addMessage(text, sender, attachments = []) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            
+            // Add attachments if any
+            if (attachments.length > 0) {
+                const attachmentHtml = attachments.map(att => 
+                    `<div style="margin-bottom: 0.5rem;">📎 ${att.name}</div>`
+                ).join('');
+                bubble.innerHTML = attachmentHtml;
+            }
+            
+            const content = document.createElement('div');
+            content.className = 'formatted-content';
+            content.innerHTML = formatMessage(text);
+            bubble.appendChild(content);
+            
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            bubble.appendChild(time);
+            
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Add system message
+        function addSystemMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'system-message';
+            
+            const content = document.createElement('div');
+            content.className = 'system-message-content';
+            content.textContent = text;
+            
+            messageDiv.appendChild(content);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Format message text
+        function formatMessage(text) {
+            // Convert markdown-like formatting
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>')
+                .replace(/• /g, '• ');
+        }
+
+        // Handle file selection
+        async function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            for (const file of files) {
+                if (file.size > 10 * 1024 * 1024) {
+                    addSystemMessage(`File "${file.name}" is too large (max 10MB)`);
+                    continue;
+                }
+                
+                // For demo, we'll just store file info
+                // In production, upload to Azure here
+                attachedImages.push({
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    url: URL.createObjectURL(file)
+                });
+            }
+            
+            updateAttachedFiles();
+            sendBtn.disabled = false;
+            fileInput.value = '';
+        }
+
+        // Handle paste event
+        async function handlePaste(e) {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+            
+            for (const item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        attachedImages.push({
+                            name: `Pasted Image ${new Date().getTime()}.png`,
+                            type: file.type,
+                            size: file.size,
+                            url: URL.createObjectURL(file)
+                        });
+                        updateAttachedFiles();
+                        sendBtn.disabled = false;
+                    }
+                }
+            }
+        }
+
+        // Update attached files display
+        function updateAttachedFiles() {
+            if (attachedImages.length === 0) {
+                attachedFilesContainer.classList.remove('active');
+                attachedFilesContainer.innerHTML = '';
+                return;
+            }
+            
+            attachedFilesContainer.classList.add('active');
+            attachedFilesContainer.innerHTML = attachedImages.map((file, index) => `
+                <div class="attached-file">
+                    <span>${file.name}</span>
+                    <button class="remove-attachment" onclick="removeAttachment(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Remove attachment
+        function removeAttachment(index) {
+            attachedImages.splice(index, 1);
+            updateAttachedFiles();
+            sendBtn.disabled = !chatInput.value.trim() && attachedImages.length === 0;
+        }
+
+        // Show/hide typing indicator
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+        }
+
+        // Theme management
+        function checkTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Quick actions menu
+        function showQuickActions() {
+            const actions = [
+                'Upload Drawing',
+                'View Estimates',
+                'Project History',
+                'Clear Chat'
+            ];
+            
+            // For demo, just show an alert
+            // In production, show a proper action sheet
+            const action = prompt('Quick Actions:\n' + actions.map((a, i) => `${i+1}. ${a}`).join('\n'));
+            
+            if (action === '4') {
+                if (confirm('Clear chat history?')) {
+                    chatMessages.innerHTML = '';
+                    addSystemMessage('Chat cleared');
+                }
+            }
+        }
+
+        // Make removeAttachment available globally
+        window.removeAttachment = removeAttachment;
+    </script>
+</body>
+</html>
